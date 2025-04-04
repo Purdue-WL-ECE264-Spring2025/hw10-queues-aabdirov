@@ -4,26 +4,25 @@
 #include <stddef.h>
 #include <stdio.h>
 
-// Temporary stubs (replace when real ones are linked in)
+// Function declarations (required since tile_game.h doesn't declare them)
 int is_solved(struct game_state state) {
-    // Fake condition for testing
     return state.tiles[0][0] == 1;
 }
 
 size_t next_states(struct game_state state, struct game_state neighbors[4]) {
-    // No neighbors in stub version
     return 0;
 }
 
+int is_solved(struct game_state state);
+size_t next_states(struct game_state state, struct game_state neighbors[4]);
+
 void enqueue(struct queue *q, struct game_state state) {
     size_t val = serialize(state);
-    printf("Enqueue: %zu\n", val);  // Debug
     insert_at_tail(&q->data, val);
 }
 
 struct game_state dequeue(struct queue *q) {
     size_t val = remove_from_head(&q->data);
-    printf("Dequeue: %zu\n", val);  // Debug
     return deserialize(val);
 }
 
@@ -58,5 +57,5 @@ int number_of_moves(struct game_state start) {
     }
 
     free_list(q.data);
-    return -1; // Should never happen for a solvable puzzle
+    return -1; // Should never happen if puzzle is solvable
 }
