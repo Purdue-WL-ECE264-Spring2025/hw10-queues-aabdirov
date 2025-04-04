@@ -4,17 +4,46 @@
 #include <stddef.h>
 #include <stdio.h>
 
-// Function declarations (required since tile_game.h doesn't declare them)
+// Temporary stub: check if puzzle is solved
 int is_solved(struct game_state state) {
-    return state.tiles[0][0] == 1;
+    int expected = 1;
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            if (i == 3 && j == 3) {
+                if (state.tiles[i][j] != 0) return 0;
+            } else {
+                if (state.tiles[i][j] != expected) return 0;
+                expected++;
+            }
+        }
+    }
+    return 1;
 }
 
+// Temporary stub: generate valid next states by moving the empty tile
 size_t next_states(struct game_state state, struct game_state neighbors[4]) {
-    return 0;
-}
+    size_t count = 0;
+    int row = state.empty_row;
+    int col = state.empty_col;
 
-int is_solved(struct game_state state);
-size_t next_states(struct game_state state, struct game_state neighbors[4]);
+    const int d_row[] = {-1, 1, 0, 0}; // Up, down
+    const int d_col[] = {0, 0, -1, 1}; // Left, right
+
+    for (int d = 0; d < 4; d++) {
+        int new_row = row + d_row[d];
+        int new_col = col + d_col[d];
+        if (new_row >= 0 && new_row < 4 && new_col >= 0 && new_col < 4) {
+            struct game_state new_state = state;
+            new_state.tiles[row][col] = new_state.tiles[new_row][new_col];
+            new_state.tiles[new_row][new_col] = 0;
+            new_state.empty_row = new_row;
+            new_state.empty_col = new_col;
+            neighbors[count++] = new_state;
+        }
+    }
+
+    return count;
+}
 
 void enqueue(struct queue *q, struct game_state state) {
     size_t val = serialize(state);
@@ -51,11 +80,12 @@ int number_of_moves(struct game_state start) {
             size_t encoded = serialize(neighbors[i]);
             if (encoded < 65536 && !visited[encoded]) {
                 visited[encoded] = 1;
+                neighbors[i].num_steps = current.num_steps + 1;
                 enqueue(&q, neighbors[i]);
             }
         }
     }
 
     free_list(q.data);
-    return -1; // Should never happen if puzzle is solvable
+    return -1;
 }
